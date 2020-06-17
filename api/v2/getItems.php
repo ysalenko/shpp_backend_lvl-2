@@ -9,8 +9,8 @@ require_once('../src/ProcessingFiles.php');
 
 $response = '{"error": 500}';
 
-if($connect = mysqli_connect($host, $user, $password, $dbName)) {
-    $select = "SELECT id, text, checked FROM ToDos";
+if($connect = mysqli_connect($host, $user, $password, $DBName)) {
+    $select = "SELECT id, text, checked FROM $dataTblName";
     $result = mysqli_query($connect, $select);
 
     if ($result) {

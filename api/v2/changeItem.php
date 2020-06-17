@@ -6,7 +6,7 @@ if($_SERVER['REQUEST_METHOD'] != 'PUT') {
 require_once('../src/DBConfig.php');
 $response = '{"error": 500}';
 
-if ($connect = mysqli_connect($host, $user, $password, $dbName)) {
+if ($connect = mysqli_connect($host, $user, $password, $DBName)) {
     require_once('../src/ProcessingFiles.php');
     $jsonData = ProcessingFiles::getRequestJsonData();
     $update = "UPDATE ToDos SET text=?, checked=? WHERE id=?";

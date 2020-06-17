@@ -7,7 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] != 'DELETE') {
 require_once('../src/DBConfig.php');
 require_once('../src/ProcessingFiles.php');
 $response = '{"error": 500}';
-if($connect = mysqli_connect($host, $user, $password, $dbName)) {
+if($connect = mysqli_connect($host, $user, $password, $DBName)) {
     $id = ProcessingFiles::getRequestJsonData()['id'];
     $delete = "DELETE FROM ToDos WHERE id = $id";
 

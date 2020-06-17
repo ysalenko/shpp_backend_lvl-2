@@ -7,7 +7,7 @@ require_once('../src/DBConfig.php');
 require_once('../src/ProcessingFiles.php');
 
 $response = '{"error": 500}';
-if($connect = mysqli_connect($host, $user, $password, $dbName)) {
+if($connect = mysqli_connect($host, $user, $password, $DBName)) {
     $jsonData = ProcessingFiles::getRequestJsonData();
     $db_request = "INSERT INTO ToDos (id, text) VALUES (NULL, ?);";
     $stmt = mysqli_prepare($connect, $db_request);

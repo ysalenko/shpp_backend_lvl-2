@@ -1,5 +1,5 @@
 <?php
-require('../src/headers_v1.php');
+require('../src/headers.php');
 require('../src/ProcessingFiles.php');
 
 $id = ProcessingFiles::getRequestJsonData()['id'];

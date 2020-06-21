@@ -1,5 +1,5 @@
 <?php
-require('../src/headers_v1.php');
+require('../src/headers.php');
 require('../src/ProcessingFiles.php');
 
 $newToDoItem = ProcessingFiles::getRequestJsonData();
@@ -7,7 +7,7 @@ $newToDoItem['id'] = ProcessingFiles::getNextId();
 $newToDoItem['checked'] = false;
 
 $dbFile = fopen(ProcessingFiles::$DB_FILE_NAME, "r+");
-if (flock($dbFile, LOCK_EX)) {
+if ($dbFile!=false && flock($dbFile, LOCK_EX)) {
     $toDoList = json_decode(stream_get_contents($dbFile), true);
     $toDoList[] = $newToDoItem;
     ProcessingFiles::writeContentToFile($dbFile, json_encode($toDoList));

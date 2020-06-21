@@ -1,6 +1,13 @@
 <?php
 
-header('Access-Control-Allow-Origin: http://www.frontend_v3.local');
+$http_origin = $_SERVER['HTTP_ORIGIN'];
+
+if ($http_origin == "http://www.frontend.local" ||
+    $http_origin == "http://www.frontend_v2.local" ||
+    $http_origin == "http://www.frontend_v3.local")
+{
+    header("Access-Control-Allow-Origin: $http_origin");
+}
 header('Access-Control-Allow-Credentials: true');
 header('Accept: application/json');
 

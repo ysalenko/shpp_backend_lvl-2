@@ -1,5 +1,5 @@
 <?php
-require('../src/headers_v3.php');
+require('../src/headers.php');
 if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     die('Unacceptable request method');
 }
@@ -14,14 +14,16 @@ try {
     $stmt = $pdo->prepare($addUser);
     $stmt->bindParam('lgn', $requestData['login'], PDO::PARAM_STR);
     $stmt->bindParam('pswrd', $requestData['pass'], PDO::PARAM_STR);
-    $result = $stmt->execute();
-    $response = $result ? '{"ok": true}' : '{"error": 500, "ok": false}';
+    if($stmt->execute()){
+        $response = ["ok" => true];
+    } else {
+        $response = setError("couldn't add new entry", 500);
+    }
 
 } catch (PDOException $ex) {
-    $message = $ex->getMessage();
-    $response = '{"error": 500, "ok": false}';
+    $response = setError('Unable to process operation', 500);
 }
-echo $response;
+echo json_encode($response);
 
 
 function checkLogin($pdoConn, $login) {
@@ -32,7 +34,8 @@ function checkLogin($pdoConn, $login) {
     $stmt->execute();
     $result = $stmt->rowCount();
     if($result) {
-        echo '{"error": 400, "ok": false, "message" : "Login Already exists"}';
+        http_response_code(400);
+        echo '{"ok": false, "error" : "Login Already exists"}';
         die();
     }
 }

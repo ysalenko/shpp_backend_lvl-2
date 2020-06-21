@@ -1,27 +1,34 @@
 <?php
-require('../src/headers_v2.php');
+require('../src/headers.php');
 if($_SERVER['REQUEST_METHOD'] != 'GET') {
     die('Unacceptable request method');
 }
 
+require_once ('../src/sessionControl.php');
+sessionStart();
+
 require_once('../src/DBConfig.php');
 require_once('../src/ProcessingFiles.php');
 
-$response = '{"error": 500}';
-
 if($connect = mysqli_connect($host, $user, $password, $DBName)) {
-    $select = "SELECT id, text, checked FROM $dataTblName";
-    $result = mysqli_query($connect, $select);
+    $select = "SELECT id, text, checked FROM $dataTblName WHERE userId=?";
+    $stmt= mysqli_stmt_init($connect);
+    mysqli_stmt_prepare($stmt,$select);
+    mysqli_stmt_bind_param($stmt, 'i', $_SESSION['userId']);
 
-    if ($result) {
+    if (mysqli_stmt_execute($stmt)) {
         $items['items'] = [];
-        $extractedRows = mysqli_num_rows($result);
+        $extractedRows = mysqli_stmt_get_result($stmt);
 
-        while ($row = mysqli_fetch_row($result)) {
-            $items['items'][] = ['id' => (int)$row[0], 'text' => $row[1], 'checked' => (bool)$row[2]];
+        while ($row = mysqli_fetch_array($extractedRows,MYSQLI_ASSOC)) {
+            $items['items'][] = $row;
         }
-        $response = json_encode($items);
+        $response = $items;
+    } else {
+        $response = setError('cant retrieve data from database', 500);
     }
     mysqli_close($connect);
+} else {
+    $response = setError('Unable to connect to database', 500);
 }
-echo $response;
+echo json_encode($response);

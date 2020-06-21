@@ -1,5 +1,5 @@
 <?php
-require('../src/headers_v3.php');
+require('../src/headers.php');
 if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     die('Unacceptable request method');
 }
@@ -9,21 +9,23 @@ require_once('../src/ProcessingFiles.php');
 $requestData = ProcessingFiles::getRequestJsonData();
 try {
     $pdo = getPDOConnection();
-    $request = "SELECT * FROM $usersTblName WHERE login LIKE :lgn";
+    $request = "SELECT userId FROM $usersTblName WHERE login LIKE :lgn AND password LIKE :pswrd;";
     $stmt = $pdo->prepare($request);
-    $stmt->bindParam('lgn', $requestData['login'], PDO::PARAM_STR);
-    $result = $stmt->execute();
-    if (!$stmt->rowCount()) {
-        $response = ['message' => "Login incorrect", 'ok' => false, 'error' => 404];
-    } elseif (($userData = $stmt->fetch(PDO::FETCH_ASSOC)['password']) !== $requestData['pass']) {
-        $response = ['message' => "Incorrect password", 'ok' => false, 'error' => 400];
-    } else {
+    $stmt->bindValue('lgn', $requestData['login'], PDO::PARAM_STR);
+    $stmt->bindValue('pswrd', $requestData['pass'], PDO::PARAM_STR);
+    $stmt->execute();
+
+    if ($stmt->rowCount() > 0) {
+        $userData = $stmt->fetch(PDO::FETCH_ASSOC);
         session_start();
         $_SESSION['userId'] = (int)$userData['userId'];
         $response = ['ok' => true];
+
+    } else {
+        $response= setError("Incorrect Login or a Password", 400);
     }
 
 } catch (PDOException $ex) {
-    $response = ['message' => $ex->getMessage(), 'ok' => false, 'error' => 500];
+    $response = setError('Unable to process operation', 500);
 }
 echo json_encode($response);

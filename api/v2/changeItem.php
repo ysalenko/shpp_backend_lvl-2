@@ -1,21 +1,31 @@
 <?php
-require('../src/headers_v2.php');
-if($_SERVER['REQUEST_METHOD'] != 'PUT') {
+require('../src/headers.php');
+if ($_SERVER['REQUEST_METHOD'] != 'PUT') {
     die('Unacceptable request method');
 }
 require_once('../src/DBConfig.php');
-$response = '{"error": 500}';
+
+require_once('../src/sessionControl.php');
+sessionStart();
 
 if ($connect = mysqli_connect($host, $user, $password, $DBName)) {
     require_once('../src/ProcessingFiles.php');
-    $jsonData = ProcessingFiles::getRequestJsonData();
-    $update = "UPDATE ToDos SET text=?, checked=? WHERE id=?";
+    $itemData = ProcessingFiles::getRequestJsonData();
+    $update = "UPDATE $dataTblName SET text=?, checked=? WHERE userId=? AND id=?";
     $stmt = mysqli_prepare($connect, $update);
-    $checked = $jsonData['checked'] ? 1 : 0;
-    mysqli_stmt_bind_param($stmt, 'sii', $jsonData['text'], $checked, $jsonData['id']);
-    $result = mysqli_stmt_execute($stmt);
+    $checked = $itemData['checked'] ? 1 : 0;
+    mysqli_stmt_bind_param($stmt, "siii",
+        $itemData['text'], $checked, $_SESSION['userId'], $itemData['id']);
+
+    if (mysqli_stmt_execute($stmt)) {
+        $response = ["ok" => true];
+    } else {
+        $response = setError('cant change data in database', 500);
+    }
 
     mysqli_close($connect);
-    $response = $result ? '{"ok": true}' : '{"ok": false}';
+} else {
+    $response = setError('Unable to connect to database', 500);
 }
-echo $response;
+
+echo json_encode($response);

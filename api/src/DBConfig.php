@@ -19,9 +19,6 @@ if ($conn) {
 
     mysqli_close($conn);
 
-    if(!$resultOfDataTblCreation || !$resultOfAddField || !$resultOfUsersTblCreation) {
-        killScript();
-    }
 }
 
 function killScript(){
